@@ -1,10 +1,7 @@
 const { connect } = require('mongoose');
 const createDefaultUser = require('./scripts/defaultUser');
 
-connect(process.env.DATABASE, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+connect(process.env.DATABASE)
   .then(() => {
     console.log('Conectado ao MongoDB');
     createDefaultUser();
