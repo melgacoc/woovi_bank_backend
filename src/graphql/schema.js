@@ -1,10 +1,13 @@
-import { makeExecutableSchema } from '@graphql-tools/schema';
-import { GraphQLObjectType, GraphQLSchema, GraphQLID, GraphQLString, GraphQLFloat, GraphQLList, GraphQLNonNull } from 'graphql';
-import { compare } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
-import User, { find, findOne, findById } from '../models/User';
-import Account, { find as _find, findById as _findById } from '../models/Account';
-import Transaction, { find as __find } from '../models/Transaction';
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const { GraphQLObjectType, GraphQLSchema, GraphQLID, GraphQLString, GraphQLFloat, GraphQLList, GraphQLNonNull } = require('graphql');
+const { compare } = require('bcrypt');
+const { sign } = require('jsonwebtoken');
+const User = require('../models/User');
+const Account = require('../models/Account');
+const Transaction = require('../models/Transaction');
+const { find, findOne, findById } = User;
+const { find: _find, findById: _findById } = Account;
+const { find: __find } = Transaction;
 
 const SECRET_KEY = 'your_secret_key_here';
 

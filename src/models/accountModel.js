@@ -1,4 +1,6 @@
-import { Schema, model } from 'mongoose';
+const mongoose = require('mongoose');
+
+const { Schema, model } = mongoose;
 
 const accountSchema = new Schema({
   owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -7,4 +9,3 @@ const accountSchema = new Schema({
 });
 
 export default model('Account', accountSchema);
-//

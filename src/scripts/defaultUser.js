@@ -1,5 +1,4 @@
-const bcrypt = require('bcryptjs');
-const User = require('../models/usersModel'); 
+const User = require('../models/usersModel');
 
 const createDefaultUser = async () => {
   try {
@@ -9,12 +8,10 @@ const createDefaultUser = async () => {
       return;
     }
 
-    const hashedPassword = bcrypt.hash(process.env.DEFAULT_USER_PASSWORD, 10);
-
     const defaultUser = new User({
       name: process.env.DEFAULT_USER_NAME,
       email: process.env.DEFAULT_USER_EMAIL,
-      password: hashedPassword,
+      password: process.env.DEFAULT_USER_PASSWORD,
       cpf: process.env.DEFAULT_USER_CPF,
     });
 
