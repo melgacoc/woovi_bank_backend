@@ -2,10 +2,10 @@
   "name": "woovi_bank_backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
     "build": "npm install --production",
     "test": "jest"
   },
