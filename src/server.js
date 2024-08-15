@@ -26,7 +26,7 @@ router.all('/graphql', graphqlHTTP({
 
 app.use(router.routes()).use(router.allowedMethods());
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 10000;
 const hostAdress = '0.0.0.0';
 app.listen(PORT, hostAdress, () => {
   console.log(`Server is running on http://localhost:${PORT}/graphql`);
