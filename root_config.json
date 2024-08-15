@@ -1,0 +1,5 @@
+{
+    "name": "Application-2",
+    "provider_region": "aws-sa-east-1",
+    "deployment_model": "LOCAL"
+}
