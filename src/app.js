@@ -1,5 +1,5 @@
-import { connect } from 'mongoose';
-import createDefaultUser from './scripts/defaultUser';
+const { connect } = require('mongoose');
+const createDefaultUser = require('./scripts/defaultUser');
 
 connect(process.env.DATABASE, {
   useNewUrlParser: true,
