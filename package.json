@@ -1,0 +1,29 @@
+{
+  "name": "woovi_bank_backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "build": "npm install --production",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@koa/cors": "^5.0.0",
+    "bcrypt": "^5.1.1",
+    "graphql": "^15.9.0",
+    "graphql-tools": "^9.0.1",
+    "jest": "^29.7.0",
+    "jsonwebtoken": "^9.0.2",
+    "koa": "^2.15.3",
+    "koa-bodyparser": "^4.4.1",
+    "koa-graphql": "^0.12.0",
+    "koa-router": "^12.0.1",
+    "mongoose": "^8.5.2",
+    "relay-runtime": "^17.0.0"
+  }
+}
