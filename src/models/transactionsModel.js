@@ -9,4 +9,4 @@ const transactionSchema = new Schema({
   date: { type: Date, default: Date.now },
 });
 
-export default model('Transaction', transactionSchema);
+module.exports = model('Transaction', transactionSchema);

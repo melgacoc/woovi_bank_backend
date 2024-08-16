@@ -28,6 +28,16 @@ app.use(router.routes()).use(router.allowedMethods());
 
 const PORT = process.env.PORT || 10000;
 const hostAdress = '0.0.0.0';
-app.listen(PORT, hostAdress, () => {
-  console.log(`Server is running on http://localhost:${PORT}/graphql`);
-});
+
+const start = async () => {
+    try {
+        app.listen(PORT, hostAdress, () => {
+            console.log(`Server is running on http://localhost:${PORT}/graphql`);
+        });
+    } catch (error) {
+        console.error('Error starting server:', error);
+        process.exit(1);
+    }
+};
+
+start();

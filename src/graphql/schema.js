@@ -1,13 +1,10 @@
 const { makeExecutableSchema } = require('@graphql-tools/schema');
 const { GraphQLObjectType, GraphQLSchema, GraphQLID, GraphQLString, GraphQLFloat, GraphQLList, GraphQLNonNull } = require('graphql');
-const { compare } = require('bcrypt');
+const { compare } = require('bcryptjs');
 const { sign } = require('jsonwebtoken');
-const User = require('../models/User');
-const Account = require('../models/Account');
-const Transaction = require('../models/Transaction');
-const { find, findOne, findById } = User;
-const { find: _find, findById: _findById } = Account;
-const { find: __find } = Transaction;
+const User = require('../models/usersModel');
+const Account = require('../models/accountModel');
+const Transaction = require('../models/transactionsModel');
 
 const SECRET_KEY = 'your_secret_key_here';
 
@@ -48,19 +45,19 @@ const RootQuery = new GraphQLObjectType({
     users: {
       type: new GraphQLList(UserType),
       resolve(parent, args) {
-        return find({});
+        return User.find({}); // Use User.find() diretamente
       },
     },
     accounts: {
       type: new GraphQLList(AccountType),
       resolve(parent, args) {
-        return _find({}).populate('owner');
+        return Account.find({}).populate('owner'); // Use Account.find() diretamente
       },
     },
     transactions: {
       type: new GraphQLList(TransactionType),
       resolve(parent, args) {
-        return __find({}).populate('from to');
+        return Transaction.find({}).populate('from to'); // Use Transaction.find() diretamente
       },
     },
   },
@@ -78,7 +75,7 @@ const Mutation = new GraphQLObjectType({
         cpf: { type: new GraphQLNonNull(GraphQLString) },
       },
       async resolve(parent, args) {
-        const existingUser = await findOne({ cpf: args.cpf });
+        const existingUser = await User.findOne({ cpf: args.cpf });
         if (existingUser) {
           throw new Error('CPF already registered');
         }
@@ -100,7 +97,7 @@ const Mutation = new GraphQLObjectType({
         password: { type: new GraphQLNonNull(GraphQLString) },
       },
       async resolve(parent, args) {
-        const user = await findOne({ email: args.email });
+        const user = await User.findOne({ email: args.email });
         if (!user) {
           throw new Error('User not found');
         }
@@ -121,7 +118,7 @@ const Mutation = new GraphQLObjectType({
         ownerId: { type: new GraphQLNonNull(GraphQLID) },
       },
       async resolve(parent, args) {
-        const user = await findById(args.ownerId);
+        const user = await User.findById(args.ownerId);
         if (!user) {
           throw new Error('User not found');
         }
@@ -142,8 +139,8 @@ const Mutation = new GraphQLObjectType({
         amount: { type: new GraphQLNonNull(GraphQLFloat) },
       },
       async resolve(parent, args) {
-        const fromAccount = await _findById(args.from);
-        const toAccount = await _findById(args.to);
+        const fromAccount = await Account.findById(args.from);
+        const toAccount = await Account.findById(args.to);
 
         if (!fromAccount || !toAccount || fromAccount.balance < args.amount) {
           throw new Error('Invalid transaction');
@@ -167,7 +164,7 @@ const Mutation = new GraphQLObjectType({
   },
 });
 
-export default makeExecutableSchema({
+module.exports = makeExecutableSchema({
   typeDefs: `
     type User {
       id: ID!
@@ -206,20 +203,20 @@ export default makeExecutableSchema({
   `,
   resolvers: {
     Query: {
-      users: () => find(),
-      accounts: () => _find().populate('owner'),
-      transactions: () => __find().populate('from to'),
+      users: () => User.find(), // Use User.find() diretamente
+      accounts: () => Account.find().populate('owner'), // Use Account.find() diretamente
+      transactions: () => Transaction.find().populate('from to'), // Use Transaction.find() diretamente
     },
     Mutation: {
       createUser: async (_, { name, email, password, cpf }) => {
-        const existingUser = await findOne({ cpf });
+        const existingUser = await User.findOne({ cpf });
         if (existingUser) throw new Error('CPF already registered');
 
         const user = new User({ name, email, password, cpf });
         return user.save();
       },
       login: async (_, { email, password }) => {
-        const user = await findOne({ email });
+        const user = await User.findOne({ email });
         if (!user) throw new Error('User not found');
 
         const isMatch = await compare(password, user.password);
@@ -229,7 +226,7 @@ export default makeExecutableSchema({
         return token;
       },
       createAccount: async (_, { ownerId }) => {
-        const user = await findById(ownerId);
+        const user = await User.findById(ownerId);
         if (!user) throw new Error('User not found');
 
         const account = new Account({
@@ -239,8 +236,8 @@ export default makeExecutableSchema({
         return account.save();
       },
       createTransaction: async (_, { from, to, amount }) => {
-        const fromAccount = await _findById(from);
-        const toAccount = await _findById(to);
+        const fromAccount = await Account.findById(from);
+        const toAccount = await Account.findById(to);
 
         if (fromAccount.balance < amount) throw new Error('Insufficient balance');
 

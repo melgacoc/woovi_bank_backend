@@ -8,4 +8,4 @@ const accountSchema = new Schema({
   balance: { type: Number, default: 0 },
 });
 
-export default model('Account', accountSchema);
+module.exports = model('Account', accountSchema);
