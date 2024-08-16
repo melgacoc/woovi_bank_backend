@@ -311,8 +311,11 @@ module.exports = makeExecutableSchema({
           await toAccount.save();
       
           const type = isDeposit ? 'entrada' : 'saída';
+
+          const transactionId = `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
       
           const transaction = new Transaction({
+            transactionId,
             from: args.from,
             to: args.to,
             amount: args.amount,
