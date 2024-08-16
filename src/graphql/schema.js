@@ -186,12 +186,19 @@ module.exports = makeExecutableSchema({
       to: Account!
       amount: Float!
       date: String!
+      type: String!
+    }
+
+    input TransactionFilterInput {
+      startDate: String
+      endDate: String
+      type: String
     }
 
     type Query {
       users: [User]
       accounts: [Account]
-      transactions: [Transaction]
+      transactions(accountId: ID!, filter: TransactionFilterInput): [Transaction]
     }
 
     type Mutation {
@@ -203,9 +210,24 @@ module.exports = makeExecutableSchema({
   `,
   resolvers: {
     Query: {
-      users: () => User.find(), // Use User.find() diretamente
-      accounts: () => Account.find().populate('owner'), // Use Account.find() diretamente
-      transactions: () => Transaction.find().populate('from to'), // Use Transaction.find() diretamente
+      users: () => User.find(),
+      accounts: () => Account.find().populate('owner'),
+      transactions: (_, { accountId, filter }) => {
+        let query = Transaction.find({
+          $or: [{ from: accountId }, { to: accountId }]
+        });
+
+        if (filter) {
+          if (filter.startDate || filter.endDate) {
+            query = query.where('date').gte(filter.startDate).lte(filter.endDate);
+          }
+          if (filter.type) {
+            query = query.where('type', filter.type);
+          }
+        }
+
+        return query.populate('from to');
+      },
     },
     Mutation: {
       createUser: async (_, { name, email, password, cpf }) => {
@@ -247,7 +269,14 @@ module.exports = makeExecutableSchema({
         await fromAccount.save();
         await toAccount.save();
 
-        const transaction = new Transaction({ from, to, amount });
+        const transaction = new Transaction({
+          from,
+          to,
+          amount,
+          type: fromAccount._id.equals(from) ? 'saida' : 'entrada',
+          date: new Date().toISOString(),
+        });
+
         return transaction.save();
       },
     },

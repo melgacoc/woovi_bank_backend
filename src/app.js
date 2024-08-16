@@ -18,11 +18,10 @@ mongoose.connect(process.env.DATABASE, {
 })
   .then(() => {
     console.log('Conectado ao MongoDB');
-    createDefaultUser();  // Criar usuário padrão após a conexão bem-sucedida
+    createDefaultUser();
   })
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
-// Configurar middleware
 app.use(cors());
 app.use(bodyParser());
 
@@ -36,7 +35,6 @@ app.use(router.routes()).use(router.allowedMethods());
 const PORT = process.env.PORT || 10000;
 const hostAdress = '0.0.0.0';
 
-// Iniciar o servidor
 app.listen(PORT, hostAdress, () => {
   console.log(`Server is running on http://localhost:${PORT}/graphql`);
 });
