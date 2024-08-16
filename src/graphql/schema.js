@@ -279,29 +279,49 @@ module.exports = makeExecutableSchema({
         });
         return account.save();
       },
-      createTransaction: async (_, { from, to, amount }) => {
-        const fromAccount = await Account.findById(from);
-        const toAccount = await Account.findById(to);
-
-        if (fromAccount.balance < amount) throw new Error('Insufficient balance');
-
-        fromAccount.balance -= amount;
-        toAccount.balance += amount;
-
-        await fromAccount.save();
-        await toAccount.save();
-
-        const type = fromAccount._id.equals(from) ? 'saida' : 'entrada';
-
-        const transaction = new Transaction({
-          from,
-          to,
-          amount,
-          type,
-          date: new Date().toISOString(),
-        });
-
-        return transaction.save();
+      createTransaction: {
+        type: TransactionType,
+        args: {
+          from: { type: new GraphQLNonNull(GraphQLID) },
+          to: { type: new GraphQLNonNull(GraphQLID) },
+          amount: { type: new GraphQLNonNull(GraphQLFloat) },
+        },
+        async resolve(parent, args) {
+          const fromAccount = await Account.findById(args.from);
+          const toAccount = await Account.findById(args.to);
+      
+          if (!fromAccount || !toAccount) {
+            throw new Error('One or both accounts not found');
+          }
+      
+          const isDeposit = fromAccount._id.equals(toAccount._id);
+      
+          if (!isDeposit && fromAccount.balance < args.amount) {
+            throw new Error('Insufficient funds');
+          }
+      
+          if (isDeposit) {
+            fromAccount.balance += args.amount;
+          } else {
+            fromAccount.balance -= args.amount;
+            toAccount.balance += args.amount;
+          }
+      
+          await fromAccount.save();
+          await toAccount.save();
+      
+          const type = isDeposit ? 'entrada' : 'saída';
+      
+          const transaction = new Transaction({
+            from: args.from,
+            to: args.to,
+            amount: args.amount,
+            type,
+            date: new Date().toISOString(),
+          });
+      
+          return transaction.save();
+        },
       },
     },
   },
