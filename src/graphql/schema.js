@@ -310,7 +310,7 @@ module.exports = makeExecutableSchema({
           await fromAccount.save();
           await toAccount.save();
       
-          const type = isDeposit ? 'income' : 'expanse';
+          const type = isDeposit ? 'income' : 'expense';
 
           const transactionId = `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
       
