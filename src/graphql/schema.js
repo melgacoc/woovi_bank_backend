@@ -36,6 +36,7 @@ const TransactionType = new GraphQLObjectType({
     to: { type: AccountType },
     amount: { type: GraphQLFloat },
     date: { type: GraphQLString },
+    type: { type: GraphQLString },
   },
 });
 
@@ -45,19 +46,36 @@ const RootQuery = new GraphQLObjectType({
     users: {
       type: new GraphQLList(UserType),
       resolve(parent, args) {
-        return User.find({}); // Use User.find() diretamente
+        return User.find({});
       },
     },
     accounts: {
       type: new GraphQLList(AccountType),
       resolve(parent, args) {
-        return Account.find({}).populate('owner'); // Use Account.find() diretamente
+        return Account.find({}).populate('owner');
       },
     },
     transactions: {
       type: new GraphQLList(TransactionType),
-      resolve(parent, args) {
-        return Transaction.find({}).populate('from to'); // Use Transaction.find() diretamente
+      args: {
+        accountId: { type: new GraphQLNonNull(GraphQLID) },
+        filter: { type: 'TransactionFilterInput' },
+      },
+      resolve(parent, { accountId, filter }) {
+        let query = Transaction.find({
+          $or: [{ from: accountId }, { to: accountId }],
+        });
+
+        if (filter) {
+          if (filter.startDate || filter.endDate) {
+            query = query.where('date').gte(filter.startDate).lte(filter.endDate);
+          }
+          if (filter.type) {
+            query = query.where('type', filter.type);
+          }
+        }
+
+        return query.populate('from to');
       },
     },
   },
@@ -152,10 +170,14 @@ const Mutation = new GraphQLObjectType({
         await fromAccount.save();
         await toAccount.save();
 
+        const type = fromAccount._id.equals(args.from) ? 'saida' : 'entrada';
+
         const transaction = new Transaction({
           from: args.from,
           to: args.to,
           amount: args.amount,
+          type,
+          date: new Date().toISOString(),
         });
 
         return transaction.save();
@@ -214,7 +236,7 @@ module.exports = makeExecutableSchema({
       accounts: () => Account.find().populate('owner'),
       transactions: (_, { accountId, filter }) => {
         let query = Transaction.find({
-          $or: [{ from: accountId }, { to: accountId }]
+          $or: [{ from: accountId }, { to: accountId }],
         });
 
         if (filter) {
@@ -269,11 +291,13 @@ module.exports = makeExecutableSchema({
         await fromAccount.save();
         await toAccount.save();
 
+        const type = fromAccount._id.equals(from) ? 'saida' : 'entrada';
+
         const transaction = new Transaction({
           from,
           to,
           amount,
-          type: fromAccount._id.equals(from) ? 'saida' : 'entrada',
+          type,
           date: new Date().toISOString(),
         });
 
