@@ -188,6 +188,13 @@ const Mutation = new GraphQLObjectType({
 
 module.exports = makeExecutableSchema({
   typeDefs: `
+    type AuthPayload {
+      token: String!
+      id: ID!
+      name: String!
+      email: String!
+    } 
+
     type User {
       id: ID!
       name: String!
@@ -224,8 +231,8 @@ module.exports = makeExecutableSchema({
     }
 
     type Mutation {
-      createUser(name: String!, email: String!, password: String!, cpf: String!): User
-      login(email: String!, password: String!): String
+      createUser(name: String!, email: String!, password: String!, cpf: String!): AuthPayload
+      login(email: String!, password: String!): AuthPayload
       createAccount(ownerId: ID!): Account
       createTransaction(from: ID!, to: ID!, amount: Float!): Transaction
     }
@@ -262,6 +269,7 @@ module.exports = makeExecutableSchema({
           token,
           id: user.id,
           email: user.email,
+          name: user.name,
         };
       },
       login: async (_, { email, password }) => {
@@ -276,6 +284,7 @@ module.exports = makeExecutableSchema({
           token,
           id: user.id,
           email: user.email,
+          name: user.name,
         }
       },
       createAccount: async (_, { ownerId }) => {
