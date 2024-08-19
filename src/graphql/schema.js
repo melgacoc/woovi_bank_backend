@@ -231,7 +231,7 @@ module.exports = makeExecutableSchema({
     }
 
     type Mutation {
-      createUser(name: String!, email: String!, password: String!, cpf: String!): AuthPayload
+      createUser(name: String!, email: String!, password: String!, cpf: String!): User
       login(email: String!, password: String!): AuthPayload
       createAccount(ownerId: ID!): Account
       createTransaction(from: ID!, to: ID!, amount: Float!): Transaction
