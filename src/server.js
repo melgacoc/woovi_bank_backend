@@ -9,14 +9,9 @@ const schema = require('./graphql/schema');
 const app = new Koa();
 const router = new Router();
 
-mongoose.connect('mongodb://localhost:27017/graphql-bank-api', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('Error connecting to MongoDB:', err));
-
-app.use(cors());
+app.use(cors({
+  origin: '*',
+}));
 app.use(bodyParser());
 
 router.all('/graphql', graphqlHTTP({
@@ -27,17 +22,17 @@ router.all('/graphql', graphqlHTTP({
 app.use(router.routes()).use(router.allowedMethods());
 
 const PORT = process.env.PORT || 10000;
-const hostAdress = '0.0.0.0';
+const hostAddress = '0.0.0.0';
 
 const start = async () => {
-    try {
-        app.listen(PORT, hostAdress, () => {
-            console.log(`Server is running on http://localhost:${PORT}/graphql`);
-        });
-    } catch (error) {
-        console.error('Error starting server:', error);
-        process.exit(1);
-    }
+  try {
+    app.listen(PORT, hostAddress, () => {
+      console.log(`Server is running on http://localhost:${PORT}/graphql`);
+    });
+  } catch (error) {
+    console.error('Error starting server:', error);
+    process.exit(1);
+  }
 };
 
 start();
