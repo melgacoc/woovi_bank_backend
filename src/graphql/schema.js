@@ -257,7 +257,12 @@ module.exports = makeExecutableSchema({
         if (existingUser) throw new Error('CPF already registered');
 
         const user = new User({ name, email, password, cpf });
-        return user.save();
+        const token = sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h' });
+        return {
+          token,
+          id: user.id,
+          email: user.email,
+        };
       },
       login: async (_, { email, password }) => {
         const user = await User.findOne({ email });
@@ -267,7 +272,11 @@ module.exports = makeExecutableSchema({
         if (!isMatch) throw new Error('Invalid credentials');
 
         const token = sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h' });
-        return token;
+        return {
+          token,
+          id: user.id,
+          email: user.email,
+        }
       },
       createAccount: async (_, { ownerId }) => {
         const user = await User.findById(ownerId);
@@ -322,6 +331,7 @@ module.exports = makeExecutableSchema({
             type,
             date: new Date().toISOString(),
           });
+
       
           return transaction.save();
         },
