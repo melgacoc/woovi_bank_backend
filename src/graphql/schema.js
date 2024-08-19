@@ -265,11 +265,13 @@ module.exports = makeExecutableSchema({
 
         const user = new User({ name, email, password, cpf });
         const token = sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h' });
+        if (!user) throw new Error('Error creating user');
         return {
           token,
           id: user.id,
           email: user.email,
           name: user.name,
+          accountId: user.accountId? user.accountId : null,
         };
       },
       login: async (_, { email, password }) => {
@@ -285,6 +287,7 @@ module.exports = makeExecutableSchema({
           id: user.id,
           email: user.email,
           name: user.name,
+          accountId: user.accountId? user.accountId : null,
         }
       },
       createAccount: async (_, { ownerId }) => {
