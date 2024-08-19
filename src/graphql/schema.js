@@ -295,7 +295,11 @@ module.exports = makeExecutableSchema({
           owner: ownerId,
           ownerName: user.name,
         });
-        return account.save();
+        await account.save();
+        user.accountId = savedAccount._id;
+        await user.save();
+        const attUser = await User.findById(ownerId);
+        return attUser;
       },
       createTransaction: {
         type: TransactionType,

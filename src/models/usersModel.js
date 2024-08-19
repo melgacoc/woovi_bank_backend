@@ -8,6 +8,7 @@ const userSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   cpf: { type: String, required: true, unique: true },
+  accountId: { type: Schema.Types.ObjectId, ref: 'Account' },
 });
 
 userSchema.pre('save', async function(next) {
