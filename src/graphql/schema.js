@@ -290,13 +290,14 @@ module.exports = makeExecutableSchema({
         const isMatch = await compare(password, user.password);
         if (!isMatch) throw new Error('Invalid credentials');
 
+        const account = await Account.findOne({ owner: user._id }).populate('owner');
         const token = sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h' });
         return {
           token,
           id: user.id,
           email: user.email,
           name: user.name,
-          accountId: user.accountId? user.accountId : null,
+          accountId: account._id,
         }
       },
       createAccount: async (_, { ownerId }) => {
