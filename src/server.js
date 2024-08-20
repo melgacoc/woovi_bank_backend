@@ -21,7 +21,7 @@ router.all('/graphql', graphqlHTTP({
 
 app.use(router.routes()).use(router.allowedMethods());
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 10001;
 const hostAddress = '0.0.0.0';
 
 const start = async () => {
@@ -36,3 +36,5 @@ const start = async () => {
 };
 
 start();
+
+module.exports = app;
