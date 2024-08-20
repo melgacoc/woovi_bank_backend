@@ -188,18 +188,13 @@ const Mutation = new GraphQLObjectType({
 
 module.exports = makeExecutableSchema({
   typeDefs: `
-    type AuthPayload {
-      token: String!
-      id: ID!
-      name: String!
-      email: String!
-    } 
-
     type User {
       id: ID!
       name: String!
       email: String!
       cpf: String!
+      token: String!
+      accountId: ID!
     }
 
     type Account {
@@ -232,7 +227,7 @@ module.exports = makeExecutableSchema({
 
     type Mutation {
       createUser(name: String!, email: String!, password: String!, cpf: String!): User
-      login(email: String!, password: String!): AuthPayload
+      login(email: String!, password: String!): User
       createAccount(ownerId: ID!): Account
       createTransaction(from: ID!, to: ID!, amount: Float!): Transaction
     }
@@ -261,17 +256,31 @@ module.exports = makeExecutableSchema({
     Mutation: {
       createUser: async (_, { name, email, password, cpf }) => {
         const existingUser = await User.findOne({ cpf });
-        if (existingUser) throw new Error('CPF already registered');
+        if (existingUser) {
+          throw new Error('CPF already registered');
+        }
 
         const user = new User({ name, email, password, cpf });
-        const token = sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h' });
-        if (!user) throw new Error('Error creating user');
+        const savedUser = await user.save();
+
+        if (!savedUser) {
+          throw new Error('Error creating user');
+        }
+
+        const account = new Account({
+          owner: savedUser._id,
+          ownerName: savedUser.name,
+        });
+        await account.save();
+  
+        const token = sign({ userId: savedUser.id }, SECRET_KEY, { expiresIn: '1h' });
         return {
           token,
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          accountId: user.accountId? user.accountId : null,
+          id: savedUser.id,
+          email: savedUser.email,
+          name: savedUser.name,
+          cpf: savedUser.cpf,
+          accountId: account._id,
         };
       },
       login: async (_, { email, password }) => {
@@ -348,7 +357,6 @@ module.exports = makeExecutableSchema({
             date: new Date().toISOString(),
           });
 
-      
           return transaction.save();
         },
       },
